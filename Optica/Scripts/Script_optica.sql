@@ -50,7 +50,7 @@ create table if not exists cliente(
 `telefono` varchar(45) default null COMMENT 'Telefono del cliente',
 `correo_electronico` varchar(45) default null COMMENT 'Correo electronico del cliente',
 `fecha_registro` date default null COMMENT 'Fecha de registro del cliente',
-`cliente_recomendador_id` int default null COMMENT 'Referencia a cliente que recomendo el servicio',
+`cliente_recomendador_id` int(6) default null COMMENT 'Referencia a cliente que recomienda el servicio',
 foreign key (cliente_recomendador_id) references cliente(id_cliente)
 );
 
@@ -164,3 +164,77 @@ VALUES
     (1, 23, 10, '2024-01-05'),
     (2, 24, 11, '2024-02-10'),
     (3, 25, 12, '2024-03-15');
+   
+   
+   -- compras por cliente
+SELECT c.nombre, c.apellido1, COUNT(v.id_venta) AS total_compras
+FROM cliente c
+LEFT JOIN venta v ON c.id_cliente = v.id_cliente
+GROUP BY c.nombre, c.apellido1;
+
+-- Filtro marca proveedor
+SELECT CONCAT(p.nombre, ' ', p.apellido1, ' ', COALESCE(p.apellido2, '')) AS nombre_proveedor, COUNT(m.id_marca) AS cantidad_marcas
+FROM proveedor p
+LEFT JOIN marca m ON p.id_proveedor = m.id_proveedor
+GROUP BY p.id_proveedor, p.nombre, p.apellido1, p.apellido2;
+
+--Filtro información gafas
+SELECT m.nombre_marca, g.graduacion_vidrio_izq, g.graduacion_vidrio_der, g.tipo_montura, g.color_montura, g.color_vidrio, g.precio
+FROM gafas g
+INNER JOIN marca m ON g.id_marca = m.id_marca;
+
+--Filtro ventas periodo
+SELECT *
+FROM venta
+WHERE fecha_venta BETWEEN '2024-01-01' AND '2024-02-28';
+
+--Gafas por empleado
+SELECT e.nombre, e.apellido1, g.id_gafas, g.tipo_montura, g.precio, v.fecha_venta
+FROM empleado e
+JOIN venta v ON e.id_empleado = v.id_empleado
+JOIN gafas g ON v.id_gafas = g.id_gafas
+WHERE YEAR(v.fecha_venta) = 2024;
+
+--Periodo ventas empleado
+SELECT v.id_venta, e.nombre AS nombre_empleado, e.apellido1 AS apellido_empleado, g.id_gafas, g.tipo_montura, g.precio, v.fecha_venta
+FROM venta v
+JOIN empleado e ON v.id_empleado = e.id_empleado
+JOIN gafas g ON v.id_gafas = g.id_gafas
+WHERE v.fecha_venta BETWEEN '2024-01-01' AND '2024-002-15';
+
+--Proveedor gafas vendidas
+SELECT DISTINCT pr.nombre, pr.apellido1
+FROM proveedor pr
+JOIN marca m ON pr.id_proveedor = m.id_proveedor
+JOIN gafas g ON m.id_marca = g.id_marca
+JOIN venta v ON g.id_gafas = v.id_gafas;
+
+--Proveedor
+SELECT 
+    proveedor.nombre AS nombre,
+    proveedor.apellido1,
+    proveedor.apellido2, 
+    proveedor.direccion_calle,
+    proveedor.direccion_numero,
+    proveedor.direccion_piso,
+    proveedor.direccion_puerta,
+    proveedor.direccion_ciudad,
+    proveedor.direccion_codigo_postal,
+    proveedor.direccion_pais,
+    proveedor.telefono,
+    proveedor.fax,
+    proveedor.nif,
+    gafas.id_marca as id_gafas
+    
+FROM 
+    gafas
+JOIN 
+    proveedor ON gafas.id_proveedor = proveedor.id_proveedor;
+
+   --Verificar marca de proveedor
+select nombre_marca, id_proveedor
+from marca;
+
+
+
+

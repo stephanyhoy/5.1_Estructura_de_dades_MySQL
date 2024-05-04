@@ -261,6 +261,18 @@ CREATE TABLE productos_pedido (
     FOREIGN KEY (producto_id) REFERENCES productos(producto_id)
 );
 
+INSERT INTO productos_pedido (pedido_id,producto_id,cantidad,precio_unitario,precio_parcial,precio_total) VALUES
+	 (1,1,2,0.99,NULL,NULL),
+	 (1,2,1,1.50,NULL,NULL),
+	 (1,3,3,1.99,NULL,NULL),
+	 (2,2,1,1.50,NULL,NULL),
+	 (2,4,2,1.99,NULL,NULL),
+	 (2,5,1,11.99,NULL,NULL),
+	 (2,6,3,12.50,NULL,NULL),
+	 (2,7,2,10.99,NULL,NULL),
+	 (2,8,1,10.99,NULL,NULL),
+	 (2,9,3,9.99,NULL,NULL);
+
 -- Para la tabla Bebidas
 ALTER TABLE bebida
 ADD COLUMN producto_id INT,
@@ -289,3 +301,88 @@ ADD COLUMN precio_total DECIMAL(10, 2);
 ALTER TABLE productos_pedido
 ADD COLUMN precio_unitario DECIMAL(10, 2);
 
+
+--Insertar información tabla productos_pedido
+INSERT INTO pizzeria1.pedido (cliente_id,fecha_hora,tipo_entrega,precio_total,tienda_id) VALUES
+	 (1,'2024-03-22 12:00:00','reparto',9.45,1),
+	 (2,'2024-03-22 13:30:00','recoger',117.91,2),
+	 (1,'2024-03-22 12:00:00','reparto',NULL,1),
+	 (2,'2024-03-22 13:30:00','recoger',NULL,2),
+	 (3,'2024-03-22 14:45:00','reparto',NULL,1),
+	 (4,'2024-03-22 15:30:00','recoger',NULL,1),
+	 (5,'2024-03-22 16:45:00','reparto',NULL,1),
+	 (6,'2024-03-22 17:30:00','recoger',NULL,1),
+	 (7,'2024-03-22 18:45:00','reparto',NULL,2),
+	 (8,'2024-03-22 19:30:00','recoger',NULL,2);
+INSERT INTO pizzeria1.pedido (cliente_id,fecha_hora,tipo_entrega,precio_total,tienda_id) VALUES
+	 (9,'2024-03-22 20:45:00','reparto',NULL,1),
+	 (10,'2024-03-22 21:30:00','recoger',NULL,2),
+	 (1,'2024-03-22 12:00:00','reparto',30.50,2),
+	 (2,'2024-03-22 13:30:00','recoger',22.49,1),
+	 (3,'2024-03-23 14:45:00','reparto',15.99,2),
+	 (4,'2024-03-24 10:00:00','recoger',10.75,1);
+
+
+-- Pizzeria requisitos
+SELECT COUNT(*) AS cantidad_bebidas_vendidas
+FROM productos_pedido pp
+JOIN pedido p ON pp.pedido_id = p.pedido_id
+JOIN cliente c ON p.cliente_id = c.cliente_id
+JOIN tienda t ON p.tienda_id = t.tienda_id
+JOIN productos pr ON pp.producto_id = pr.producto_id
+WHERE pr.tipo = 'bebida'
+AND t.localidad = 'Barcelona';
+
+
+SELECT COUNT(*) AS cantidad_pedidos
+FROM entrega e
+JOIN empleado em ON e.empleado_id = em.empleado_id
+WHERE em.nombre = 'Pedro' AND em.apellidos = 'Martínez';
+
+
+-- Lista cuántos pedidos ha efectuado un determinado empleado, aqui utilizando el id del empleado
+SELECT COUNT(pedido_id) AS total_pedidos
+FROM entrega
+WHERE empleado_id = 5;
+
+-- Lista cuántos pedidos ha efectuado un determinado empleado, aqui utilizando el nombre y apellidos del empleado
+SELECT COUNT(pedido_id) AS total_pedidos
+FROM entrega
+WHERE empleado_id = (SELECT empleado_id FROM empleado WHERE nombre = 'Pedro' AND apellidos = 'Martínez');
+
+SELECT COUNT(pp.producto_id) AS cantidad_productos_vendidos
+FROM productos_pedido pp
+JOIN productos p ON pp.producto_id = p.producto_id
+JOIN pedido pe ON pp.pedido_id = pe.pedido_id
+JOIN cliente c ON pe.cliente_id = c.cliente_id
+WHERE p.tipo = 'bebida'
+AND c.localidad = 'Barcelona';
+
+
+SELECT FORMAT(precio_unitario, 2) AS precio_formateado
+FROM productos;
+
+SELECT FORMAT(precio_parcial, 2) AS precio_formateado
+FROM productos_pedido;
+
+SELECT FORMAT(precio_unitario, 2) AS precio_format_unit
+FROM productos_pedido;
+
+
+-- se calcula el precio total de cada producto en el pedido multiplicando la cantidad por el precio unitario
+SELECT pedido_id, producto_id, cantidad, precio_unitario, (cantidad * precio_unitario) AS precio_producto
+FROM productos_pedido;
+
+-- calcula el precio total de cada producto en el pedido multiplicando la cantidad por el precio unitario
+SELECT pedido_id, SUM(cantidad * precio_unitario) AS precio_total_pedido
+FROM productos_pedido
+GROUP BY pedido_id;
+
+-- se actualiza la tabla pedido con el precio total calculado
+UPDATE pedido p
+JOIN (
+    SELECT pedido_id, SUM(cantidad * precio_unitario) AS precio_total_pedido
+    FROM productos_pedido
+    GROUP BY pedido_id
+) AS total_pedido ON p.pedido_id = total_pedido.pedido_id
+SET p.precio_total = total_pedido.precio_total_pedido;
