@@ -302,7 +302,7 @@ ALTER TABLE productos_pedido
 ADD COLUMN precio_unitario DECIMAL(10, 2);
 
 
---Insertar información tabla productos_pedido
+-- Insertar información tabla productos_pedido
 INSERT INTO pizzeria1.pedido (cliente_id,fecha_hora,tipo_entrega,precio_total,tienda_id) VALUES
 	 (1,'2024-03-22 12:00:00','reparto',9.45,1),
 	 (2,'2024-03-22 13:30:00','recoger',117.91,2),
