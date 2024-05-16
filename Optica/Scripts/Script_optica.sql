@@ -166,11 +166,20 @@ VALUES
     (3, 25, 12, '2024-03-15');
    
    
-   -- compras por cliente
+-- compras por cliente
+
 SELECT c.nombre, c.apellido1, COUNT(v.id_venta) AS total_compras
 FROM cliente c
 LEFT JOIN venta v ON c.id_cliente = v.id_cliente
 GROUP BY c.nombre, c.apellido1;
+
+-- lista de compras por un cliente
+SELECT c.nombre, c.apellido1, c.apellido2, COUNT(v.id_venta) AS total_compras
+FROM cliente c
+LEFT JOIN venta v ON c.id_cliente = v.id_cliente
+WHERE c.id_cliente = 3
+GROUP BY c.id_cliente;
+
 
 -- Filtro marca proveedor
 SELECT CONCAT(p.nombre, ' ', p.apellido1, ' ', COALESCE(p.apellido2, '')) AS nombre_proveedor, COUNT(m.id_marca) AS cantidad_marcas
@@ -200,14 +209,15 @@ SELECT v.id_venta, e.nombre AS nombre_empleado, e.apellido1 AS apellido_empleado
 FROM venta v
 JOIN empleado e ON v.id_empleado = e.id_empleado
 JOIN gafas g ON v.id_gafas = g.id_gafas
-WHERE v.fecha_venta BETWEEN '2024-01-01' AND '2024-002-15';
+WHERE YEAR(v.fecha_venta) and e.nombre="Rocio" ;
 
 -- Proveedor gafas vendidas
-SELECT DISTINCT pr.nombre, pr.apellido1
+SELECT DISTINCT pr.nombre, pr.apellido1, count(g.id_gafas) as gafas_vendidas
 FROM proveedor pr
 JOIN marca m ON pr.id_proveedor = m.id_proveedor
 JOIN gafas g ON m.id_marca = g.id_marca
-JOIN venta v ON g.id_gafas = v.id_gafas;
+JOIN venta v ON g.id_gafas = v.id_gafas
+group by pr.nombre, pr.apellido1 ;
 
 -- Proveedor
 SELECT 
@@ -231,9 +241,13 @@ FROM
 JOIN 
     proveedor ON gafas.id_proveedor = proveedor.id_proveedor;
 
-   -- Verificar marca de proveedor
+-- Verificar marca de proveedor
 select nombre_marca, id_proveedor
 from marca;
+
+
+
+
 
 
 
